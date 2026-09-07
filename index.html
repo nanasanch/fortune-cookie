@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,9 +37,9 @@
     .cookie-button {
       position: absolute;
       left: 30%;
-      top: 62%;
+      top: 61%;
       width: 40%;
-      height: 18%;
+      height: 16%;
       border: none;
       background: transparent;
       cursor: pointer;
@@ -49,34 +48,48 @@
     }
 
     .cookie-button:active {
-      transform: scale(0.96);
+      transform: scale(0.97);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      pointer-events: none;
+      transition: background 0.35s ease;
+      z-index: 15;
+    }
+
+    .overlay.show {
+      background: rgba(0,0,0,0.42);
     }
 
     .fortune-card {
       position: absolute;
       left: 50%;
-      top: 68%;
+      top: 66%;
       transform: translate(-50%, -50%) scale(0.9);
 
-      width: 72%;
-      max-width: 310px;
+      width: 74%;
+      max-width: 320px;
 
-      background: #f5e6c8;
-      color: #1b1b1b;
+      background: #f4e4c4;
+      color: #171717;
 
-      padding: 20px 18px;
+      padding: 22px 22px 24px;
       box-sizing: border-box;
 
       text-align: center;
-      font-family: Georgia, serif;
 
       border-radius: 4px;
-      box-shadow: 0 10px 35px rgba(0,0,0,0.55);
+      box-shadow: 0 12px 38px rgba(0,0,0,0.55);
 
       opacity: 0;
       pointer-events: none;
 
-      transition: all 0.35s ease;
+      transition:
+        opacity 0.35s ease,
+        transform 0.35s ease;
 
       z-index: 20;
     }
@@ -91,12 +104,30 @@
       font-size: 11px;
       letter-spacing: 3px;
       text-transform: uppercase;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .fortune-title::before,
+    .fortune-title::after {
+      content: "";
+      display: inline-block;
+      width: 42px;
+      height: 1px;
+      background: #262626;
+      vertical-align: middle;
+      margin: 0 10px;
     }
 
     .fortune-text {
-      font-size: 18px;
-      line-height: 1.45;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 22px;
+      line-height: 1.35;
+    }
+
+    .fortune-heart {
+      margin-top: 12px;
+      font-size: 22px;
     }
   </style>
 </head>
@@ -114,24 +145,27 @@
     <button
       class="cookie-button"
       onclick="revealFortune()"
-      aria-label="Reveal your fortune">
-    </button>
+      aria-label="Reveal your fortune"
+    ></button>
+
+    <div class="overlay" id="overlay"></div>
 
     <div class="fortune-card" id="fortuneCard">
       <div class="fortune-title">Your Fortune</div>
       <div class="fortune-text" id="fortuneText">
         Something wonderful is coming your way.
       </div>
+      <div class="fortune-heart">♡</div>
     </div>
 
   </div>
 
   <script>
     function revealFortune() {
+      document.getElementById("overlay").classList.add("show");
       document.getElementById("fortuneCard").classList.add("show");
     }
   </script>
 
 </body>
-
 </html>

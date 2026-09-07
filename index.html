@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>The Infinite Fortune Cookie</title>
 
   <style>
+
     html, body {
       margin: 0;
       padding: 0;
-      background: #000;
       min-height: 100%;
+      background: #000;
       font-family: Arial, sans-serif;
     }
 
@@ -25,6 +28,7 @@
       position: relative;
       width: 100%;
       max-width: 430px;
+      margin: 0 auto;
     }
 
     .hero-image {
@@ -33,31 +37,40 @@
       height: auto;
     }
 
+    /* Invisible button placed over the fortune cookie */
+
     .cookie-button {
       position: absolute;
-      left: 31%;
-      top: 66%;
-      width: 38%;
-      height: 14%;
+
+      left: 30%;
+      top: 62%;
+
+      width: 40%;
+      height: 18%;
+
       border: none;
       background: transparent;
+
       cursor: pointer;
       z-index: 10;
+
       -webkit-tap-highlight-color: transparent;
     }
 
     .cookie-button:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
     }
+
   </style>
 </head>
+
 
 <body>
 
   <div class="page">
 
     <img
-      src="12a79145-02c7-48f8-87ce-a85e67ed2592.png"
+      src="fortune.png"
       alt="The Infinite Fortune Cookie"
       class="hero-image"
     >
@@ -65,16 +78,22 @@
     <button
       class="cookie-button"
       onclick="revealFortune()"
-      aria-label="Reveal your fortune"
-    ></button>
+      aria-label="Reveal your fortune">
+    </button>
 
   </div>
 
+
   <script>
+
     function revealFortune() {
+
       alert("Your fortune is coming next...");
+
     }
+
   </script>
 
 </body>
+
 </html>

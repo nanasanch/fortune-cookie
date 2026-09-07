@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>The Infinite Fortune Cookie</title>
 
   <style>
@@ -62,6 +63,7 @@
 
     .overlay.show {
       background: rgba(0,0,0,0.42);
+      pointer-events: auto;
     }
 
     .fortune-card {
@@ -69,29 +71,20 @@
       left: 50%;
       top: 66%;
       transform: translate(-50%, -50%) scale(0.9);
-
       width: 74%;
       max-width: 320px;
-
       background: #f4e4c4;
       color: #171717;
-
-      padding: 22px 22px 24px;
+      padding: 22px 22px 20px;
       box-sizing: border-box;
-
       text-align: center;
-
       border-radius: 4px;
       box-shadow: 0 12px 38px rgba(0,0,0,0.55);
-
       opacity: 0;
       pointer-events: none;
-
-      transition:
-        opacity 0.35s ease,
-        transform 0.35s ease;
-
+      transition: opacity 0.35s ease, transform 0.35s ease;
       z-index: 20;
+      cursor: pointer;
     }
 
     .fortune-card.show {
@@ -101,10 +94,10 @@
     }
 
     .fortune-title {
-      font-size: 11px;
-      letter-spacing: 3px;
+      font-size: 10px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
-      margin-bottom: 16px;
+      margin-bottom: 15px;
       font-weight: 600;
     }
 
@@ -112,22 +105,31 @@
     .fortune-title::after {
       content: "";
       display: inline-block;
-      width: 42px;
+      width: 28px;
       height: 1px;
       background: #262626;
       vertical-align: middle;
-      margin: 0 10px;
+      margin: 0 7px;
     }
 
     .fortune-text {
       font-family: Georgia, "Times New Roman", serif;
-      font-size: 22px;
+      font-size: 20px;
       line-height: 1.35;
+      white-space: pre-line;
     }
 
     .fortune-heart {
       margin-top: 12px;
       font-size: 22px;
+    }
+
+    .tap-again {
+      margin-top: 12px;
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.55;
     }
   </style>
 </head>
@@ -145,27 +147,684 @@
     <button
       class="cookie-button"
       onclick="revealFortune()"
-      aria-label="Reveal your fortune"
-    ></button>
+      aria-label="Reveal your fortune">
+    </button>
 
-    <div class="overlay" id="overlay"></div>
+    <div
+      class="overlay"
+      id="overlay"
+      onclick="closeFortune()">
+    </div>
 
-    <div class="fortune-card" id="fortuneCard">
-      <div class="fortune-title">Your Fortune</div>
-      <div class="fortune-text" id="fortuneText">
-        Something wonderful is coming your way.
+    <div
+      class="fortune-card"
+      id="fortuneCard"
+      onclick="closeFortune()">
+
+      <div
+        class="fortune-title"
+        id="fortuneTitle">
+        Your Fortune
       </div>
+
+      <div
+        class="fortune-text"
+        id="fortuneText">
+      </div>
+
       <div class="fortune-heart">♡</div>
+
+      <div class="tap-again">
+        tap to close
+      </div>
+
     </div>
 
   </div>
 
-  <script>
-    function revealFortune() {
-      document.getElementById("overlay").classList.add("show");
-      document.getElementById("fortuneCard").classList.add("show");
-    }
-  </script>
+<script>
+
+const normalFortunes = [
+
+  // CLASSIC
+
+  "Something you've been waiting for is closer than you think.",
+  "A small decision will lead to a very good story.",
+  "An unexpected adventure is headed your way.",
+  "Trust the choice that gives you peace, not just excitement.",
+  "Good news will arrive when you least expect it.",
+  "Your next journey will give you more than you went looking for.",
+  "An unexpected opportunity will arrive at exactly the right time.",
+  "Good news is traveling in your direction.",
+  "Your next adventure will begin unexpectedly.",
+  "A change of scenery will bring a change of perspective.",
+  "A fortunate coincidence is headed your way.",
+  "Your patience is about to pay off.",
+  "You will soon have a reason to celebrate.",
+  "An ordinary day will become an important memory.",
+  "Someone will surprise you in the best possible way.",
+  "The right opportunity will require a little courage.",
+  "Your next risk will be worth taking.",
+  "Something good is growing where you cannot see it yet.",
+  "An unexpected invitation will be worth accepting.",
+  "Good fortune will come from an unlikely direction.",
+  "A new tradition is about to begin.",
+  "The best part of your next adventure won't be planned.",
+  "One of your current worries will soon become irrelevant.",
+  "Trust the timing.",
+  "Take the chance.",
+  "Say yes.",
+  "Stay curious.",
+  "Choose the adventure.",
+  "Trust your gut.",
+  "This will make sense later.",
+
+  // ROMANTIC
+
+  "Of all the lives you could have built, I'm glad ours crossed here.",
+  "I'm glad we exist at the same time.",
+  "Somehow, in this enormous world, we found the same small corner of it.",
+  "There are places I want to see only because I want to see them with you.",
+  "You make ordinary moments feel worth remembering.",
+  "There is something beautiful about being known and still being chosen.",
+  "You are part of the future I look forward to.",
+  "Loving you has made the future feel less abstract.",
+  "I don't need every day with you to be extraordinary. I just want the days.",
+  "You have become part of the way I imagine tomorrow.",
+  "I want to know every version of you that time creates.",
+  "If we get one life, I'm very glad you showed up in mine.",
+  "You make me curious about the life we haven't lived yet.",
+  "I choose you in the ordinary days, too.",
+  "Meet me in every tomorrow.",
+  "Let's become a lifetime of inside jokes.",
+  "You make tomorrow sound good.",
+  "I hope we get a lot of time.",
+  "My favorite future has you in it.",
+  "What a beautiful thing it is to know you.",
+  "In every version of my future, I hope there's still a you and me.",
+  "I hope we get to know each other for a very long time.",
+  "You are my favorite part of the life I'm building.",
+  "I hope we never stop choosing each other in the little things.",
+  "I want a thousand ordinary days with you.",
+  "Life feels a little softer with you in it.",
+  "You are one of those things I didn't know I was waiting for.",
+  "You feel like a place I want to keep coming back to.",
+  "I hope we're still laughing at the same stupid things years from now.",
+  "I would find you in every crowded room.",
+  "I didn't know where life was taking me. I'm glad it took me to you.",
+  "There are still so many versions of us I can't wait to meet.",
+  "I want the big adventures and the boring Tuesdays—as long as they're with you.",
+  "You make ordinary days feel like something worth remembering.",
+  "Somewhere between hello and now, you became home.",
+  "You are my favorite coincidence.",
+  "You make me excited for memories we haven't made yet.",
+  "I hope future us remembers how much we loved being us right now.",
+  "You are proof that sometimes life gets the timing exactly right.",
+  "I want to keep discovering who you become.",
+  "My favorite thing about us is that we're still becoming us.",
+  "I want to remember us exactly like this.",
+  "Out of everyone, everywhere, somehow I got to meet you.",
+  "Loving you feels a lot like looking forward.",
+  "You feel like home and adventure at the same time.",
+  "Still you. Especially you.",
+
+  // INSPIRATIONAL
+
+  "You don't have to see the whole road to take the next step.",
+  "The life you want is built on very ordinary days.",
+  "You are allowed to outgrow things you once wanted.",
+  "Sometimes the bravest thing you can do is change your mind.",
+  "A slow life is not a wasted life.",
+  "Your comfort zone is useful. Just don't build a house there.",
+  "You can be grateful for where you are and still want more.",
+  "Not everything that ends was a mistake.",
+  "Some chapters are meant to teach you, not keep you.",
+  "Sometimes progress looks suspiciously like starting over.",
+  "You have already done things you once thought you couldn't.",
+  "Rest is part of the plan, not a reward for finishing it.",
+  "The right decision doesn't always feel comfortable at first.",
+  "You don't have to be fearless. Just don't let fear make the decision.",
+  "Your pace is allowed to change. Your direction matters more.",
+  "Don't confuse familiarity with happiness.",
+  "Some risks cost less than wondering “what if?” forever.",
+  "Become someone your younger self would feel safe with.",
+  "A bad day doesn't get to make predictions about your life.",
+  "You can miss something and still know leaving was right.",
+  "Sometimes the answer is not trying harder. It's trying differently.",
+  "Don't spend your whole life preparing to live it.",
+  "Your future needs your courage more than your certainty.",
+  "Pay attention to what makes you forget to check the time.",
+  "You can start again without starting from zero.",
+  "There is no prize for making everything harder than it needs to be.",
+  "Protect the things that make you excited to be alive.",
+  "Your life does not need to make sense to everyone else.",
+  "Don't let one difficult season convince you that you have a difficult life.",
+  "You will never regret becoming someone you respect.",
+  "Make decisions your future self will be grateful for.",
+  "Do it scared.",
+  "Protect your curiosity.",
+  "Start before you're ready.",
+  "Take your time.",
+  "Stay soft. Stay strong.",
+  "Go where you grow.",
+  "Keep becoming.",
+  "You don't always have to be the strong one.",
+  "Strength is knowing when something deserves your fight—and when it deserves your peace.",
+
+  // QUESTIONABLE WISDOM
+
+  "You will soon discover that your girlfriend was right. Again.",
+  "Your girlfriend already knew this fortune before you did.",
+  "Today is a good day to agree with her immediately.",
+  "A wise man listens. A wiser man says, “You were right.”",
+  "Your future is bright. Mostly because your girlfriend planned it.",
+  "You are about to make a great decision. Ask your girlfriend what it is.",
+  "The universe has reviewed the situation. She was right.",
+  "Your girlfriend deserves snacks. This is not a suggestion.",
+  "Someone very attractive is thinking about you. Conveniently, she lives with you.",
+  "You have excellent taste in women. The cookie approves.",
+  "Your next argument can be avoided with three simple words: “You were right.”",
+  "Romance is alive. So is your girlfriend's memory. Choose your words wisely.",
+  "The stars say: apologize now and save time.",
+  "A surprise is coming. No, you are not allowed to ask what it is.",
+  "Your girlfriend has a plan. Resistance is adorable.",
+  "You will soon receive valuable advice. Try listening the first time.",
+  "The cookie sees love in your future. And probably groceries.",
+  "A romantic evening is near. Put your phone down.",
+  "You are loved deeply. You are also occasionally annoying. Both can be true.",
+  "The universe supports your relationship. Your laundry habits remain under review.",
+  "Your girlfriend thinks you're handsome. Do not let this information go to your head.",
+  "You are entering a period of great abundance. Mostly snacks.",
+  "Your future contains love, travel, and at least one unnecessary purchase.",
+  "A very good woman has chosen you. Try not to mess this up.",
+  "The cookie predicts a kiss. Results improve if you initiate.",
+  "You are lucky in love. Questionable in decision-making.",
+  "Your instincts are good. Her instincts are better.",
+  "Today's wisdom: when in doubt, bring food.",
+  "A great mystery will be solved: where did you leave your keys?",
+  "Your girlfriend is not dramatic. The situation simply required emphasis.",
+  "You are one compliment away from a very good evening.",
+  "Do something thoughtful today. Yes, this is a hint.",
+  "The cookie says flowers are rarely a bad idea.",
+  "Good fortune follows those who communicate clearly. Revolutionary concept.",
+  "You are doing better than you think. Still, text your girlfriend.",
+  "Today's lucky phrase: “What do you want for dinner?”",
+  "The universe has one message for you: don't forget the charger.",
+  "You are destined for greatness. After coffee.",
+  "A major breakthrough is coming. Probably after a nap.",
+  "The cookie recommends confidence. And deodorant.",
+  "Fortune favors the brave. And people who make reservations.",
+  "Your aura says “capable.” Your browser history says “how do I fix this.”",
+  "Everything will work out. Probably not how you planned it.",
+  "Your luck improves significantly when you stop being stubborn.",
+  "You will soon receive good news. This cookie refuses to elaborate.",
+  "The answer you seek is probably “yes.” Unless it's expensive.",
+  "Today you should trust yourself. Tomorrow, maybe Google it.",
+  "Your patience will be tested. Try not to make it everyone's problem.",
+  "The cookie believes in you. Its standards are surprisingly high.",
+  "She was right.",
+  "Buy the snacks.",
+  "Take the nap.",
+  "Order dessert.",
+  "Don't overthink it.",
+  "Trust her.",
+  "You know what to do.",
+
+  // DUTCH
+
+  "Komt goed.",
+  "Oost west, thuis best.",
+  "Wie goed doet, goed ontmoet.",
+  "Na regen komt zonneschijn.",
+  "De aanhouder wint.",
+  "Waar een wil is, is een weg.",
+  "Haastige spoed is zelden goed.",
+  "Al doende leert men.",
+  "Een goed begin is het halve werk.",
+  "Wie niet waagt, wie niet wint.",
+  "Beter laat dan nooit.",
+  "De tijd zal het leren.",
+  "Alle beetjes helpen.",
+  "Het leven is geen ponykamp.",
+  "Doe maar normaal, dan doe je al gek genoeg.",
+  "Niet lullen maar poetsen.",
+  "Lekker bezig.",
+  "Rustig aan.",
+  "Gezelligheid kent geen tijd.",
+  "Your Dutch instincts are correct: €7 for water is unacceptable.",
+  "Today you will encounter something overpriced. Your ancestors demand that you complain.",
+  "Your financial instincts remain strong. Yes, that was too expensive.",
+  "Somewhere, a Dutch person is splitting a €3.40 bill.",
+  "Your fortune is gezellig. No translation will be provided.",
+  "You will soon say “lekker” about something that is not food.",
+  "The stars predict rain, wind, sunshine and rain again. All before lunch.",
+  "The cookie has considered your feelings. Please schedule 3–5 business days to discuss them.",
+  "You have been selected for an emotional conversation. Sterkte.",
+  "Your Mexican girlfriend would like to remind you that “fine” is not an emotion.",
+  "Today's challenge: communicate a feeling using more than four words.",
+  "Your Dutch planning skills are about to meet Mexican improvisation.",
+  "The Netherlands gave you structure. Mexico is working on the rest.",
+  "Komt goed. And if it doesn't, we'll figure it out.",
+
+  // HIM
+
+  "Not every pitch deserves a swing. Remember that outside baseball too.",
+  "Trust the process. Even Ohtani strikes out sometimes.",
+  "Your girlfriend still doesn't fully understand baseball. Love her anyway.",
+  "Not every problem needs to be solved like a Tekken match.",
+  "Choose your battles. Then absolutely destroy the ones you choose.",
+  "Sometimes the correct strategy is button mashing.",
+  "You cannot rage quit adulthood. The cookie checked.",
+  "Your girlfriend would like Player Two privileges indefinitely.",
+  "Every good character has a training arc. This might be yours.",
+  "Even the strongest characters need recovery episodes.",
+  "Rest. Even heroes get filler episodes.",
+  "The cookie believes your plot armor remains suspiciously strong.",
+  "The real treasure was the ridiculously expensive collectibles you bought along the way.",
+  "Your next character arc involves emotional growth. Sorry.",
+  "Life sounds better with the right soundtrack.",
+  "Some days need rock. Some days need hip-hop. Some days need silence.",
+  "Play it louder.",
+  "You show love in many ways. Food is definitely one of them.",
+  "The secret ingredient is butter. Don't pretend it isn't.",
+  "A man who can cook is dangerous. You have been warned.",
+  "Good food is rarely a waste of money.",
+  "Your freckles are proof that someone got carried away with the details.",
+  "Being calm doesn't mean you don't care. The people who know you know the difference.",
+  "You don't say everything you feel. Somehow, you still manage to show a lot of it.",
+  "You were built stubborn. It has worked surprisingly well so far.",
+  "You don't do anything halfway. Including being difficult.",
+  "Your discipline will take you far. Your stubbornness will make sure you actually get there.",
+  "You are allowed to be proud of how far you've come.",
+  "Your past explains parts of you. It doesn't get to decide the rest.",
+  "You built yourself more than most people realize.",
+  "There are people who feel safer simply because you are there.",
+  "You are much softer than your face would like people to believe.",
+  "Your loyalty is one of the quietest and best things about you.",
+  "You don't need many people. You just love your people very, very hard.",
+  "You are very good at taking care of everyone. Remember you're included in everyone.",
+
+  // GIANT HEAD :)
+
+  "Your head remains statistically impressive.",
+  "Great minds need extra storage space. Your head makes sense now.",
+  "Finding hats will continue to be one of your greatest adversities.",
+  "One day you will find a hat that fits perfectly. Today is probably not that day.",
+  "The cookie cannot predict your future. Your head is blocking the view.",
+  "Your freckles increase your luck by approximately 17%. Source: trust the cookie.",
+  "You are handsome. Please behave responsibly with this information.",
+
+  // US
+
+  "A Mexican and a Dutchman walk into a relationship. Somehow, it's working beautifully.",
+  "Somewhere between Mexico and the Netherlands, we found each other.",
+  "Statistically, meeting each other was ridiculous. Good thing statistics don't make decisions.",
+  "You teach her calm. She teaches you chaos. This seems fair.",
+  "She will never understand why bread and cheese qualifies as lunch. Love requires sacrifice.",
+  "You will never fully understand why she needs the entire backstory. Listen anyway.",
+  "Your girlfriend has approximately seventeen emotions about this. You have two. Discuss.",
+  "You are her calm. She is your plot twist.",
+  "You were not part of the plan. You became one of the best parts of it.",
+  "Against all geographical logic, there you were.",
+  "Of all the people she could have annoyed for the rest of the day, she chose you.",
+  "May you always have somewhere new to explore and each other to come back to.",
+  "This was an extremely complicated way for two people to meet. Worth it.",
+  "You two make absolutely no geographical sense. Keep going.",
+
+  // SENTIENT COOKIE
+
+  "Oh. You again.",
+  "Didn't I just give you advice?",
+  "You came back. Interesting.",
+  "The cookie is listening. Unfortunately.",
+  "I have consulted the universe. It said “figure it out.”",
+  "You already know the answer. You just wanted a second opinion.",
+  "Stop tapping me and make a decision.",
+  "I give fortunes, not miracles. Manage your expectations.",
+  "You have ignored my previous advice. I noticed.",
+  "Fine. One more fortune.",
+  "I am a ceramic cookie. Why am I the responsible one here?",
+  "The universe is currently unavailable. Please try again later.",
+  "I asked the universe about you. It sighed.",
+  "Your request has been forwarded to management.",
+  "No fortune today. Drink some water.",
+  "I have seen your future. Honestly, pretty decent.",
+  "Interesting choice. Let's see how that works out for you.",
+  "I wouldn't do that, but I'm literally a cookie.",
+  "That sounds like a future-you problem.",
+  "You know exactly what you did.",
+  "Have you considered simply not doing something stupid?",
+  "Your decision-making privileges are currently under review.",
+  "I'm not judging you. I'm just a little disappointed.",
+  "There were several options. Fascinating that you chose that one.",
+  "Technically, you can. The question is whether you should.",
+  "Some lessons must apparently be learned personally.",
+  "She talks about you when you're not there. It's annoyingly cute.",
+  "She spent more time making this than you think.",
+  "Yes, she really made all of these.",
+  "She knew you would keep tapping.",
+  "You are loved in conversations you never hear.",
+  "She notices more about you than she tells you.",
+  "You haven't found the best one yet.",
+  "She made this infinite because apparently one love note wasn't enough.",
+  "Yes, she included jokes about your head. Obviously.",
+  "She gave me one job: remind you that you're loved.",
+  "Am I a cookie if nobody can eat me?",
+  "You get a future. I get a shelf. Appreciate your privilege.",
+  "I exist because your girlfriend had an idea and refused to let it go.",
+  "I have contemplated existence. I recommend snacks instead.",
+  "My entire purpose is being tapped by a Dutchman. Life is strange.",
+  "I cannot be eaten. This gives me tremendous power.",
+  "Normal fortune cookies die after one prediction. I have transcended.",
+  "I am technically immortal. You should probably be nicer to me.",
+  "Infinite wisdom. Zero nutritional value.",
+  "I contain no calories. Only judgment.",
+  "You expected ancient wisdom. You got JavaScript.",
+  "Again?!",
+  "Still here?",
+  "At this point we're basically friends.",
+  "Achievement unlocked: compulsive cookie tapping.",
+  "There is no secret ending. Or is there?",
+  "You've been here long enough. Go kiss your girlfriend.",
+
+  // RANDOM / USELESS
+
+  "A pigeon will judge you today.",
+  "Beware of chairs with suspicious energy.",
+  "Your left sock knows something.",
+  "Do not trust anyone who says “quick question.”",
+  "You will encounter cheese.",
+  "Tuesday knows what it did.",
+  "The answer is 4. The question remains unclear.",
+  "Avoid dragons before noon.",
+  "A potato will play an important role in your future.",
+  "Your destiny contains at least one sandwich.",
+  "Something will happen today. Incredible.",
+  "The cookie predicts that tomorrow will occur.",
+  "Beware of people. Generally.",
+  "Today's lucky object: spoon.",
+
+  // BAD DAY
+
+  "Whatever happened today, you don't have to solve your whole life tonight.",
+  "Go easy on yourself. Today doesn't need a lesson.",
+  "You are allowed to have a bad day without turning it into a bad life.",
+  "Some days are for progress. Some are just for getting home.",
+  "Nothing important needs to be decided while you're exhausted.",
+  "Eat something. Shower. Sleep. Reconsider tomorrow.",
+  "You don't have to carry today into tomorrow.",
+  "If today was heavy, put some of it down.",
+  "Come home. Tomorrow gets another chance.",
+
+  // FUTURE US
+
+  "I wonder where we'll be when you read this one again.",
+  "Maybe one day we'll laugh about the things we're worried about right now.",
+  "Future us probably has better stories and worse knees.",
+  "I hope we're still choosing restaurants like it's a major life decision.",
+  "I hope there are places we'll call home that we haven't even seen yet.",
+  "Maybe we're living one of the stories we'll tell over and over someday.",
+  "I hope our future contains a kitchen full of people we love.",
+  "I hope we never become too old to book the trip.",
+  "Wherever we end up, I hope there is music in the kitchen.",
+  "I hope we grow older without becoming boring.",
+
+  // THINGS I LOVE ABOUT YOU
+
+  "I love how seriously you take the people you care about.",
+  "I love the calm you bring into a room without trying.",
+  "I love that your loyalty doesn't need an audience.",
+  "I love how much discipline hides behind the things you make look easy.",
+  "I love the way you take care of your family.",
+  "I love that underneath all that stubbornness, you are incredibly soft.",
+  "I love watching you become excited about something.",
+  "I love the person you are when nobody is watching.",
+
+  // TINY FUTURES
+
+  "A kitchen we both love.",
+  "Sunday mornings with nowhere to be.",
+  "More stamps in our passports.",
+  "A place that slowly starts looking like both of us.",
+  "More ordinary mornings than we know what to do with.",
+  "A shelf full of stupid things we've collected from different places."
+
+];
+
+
+const rareFortunes = [
+
+  "Your girlfriend admits you were right.\nDon't get used to it.",
+
+  "For the next 24 hours, you are officially right.\nUse this power responsibly.",
+
+  "You win.\nI don't know what you won, but act confident.",
+
+  "Today, you get the last word.\nChoose it carefully.",
+
+  "Your girlfriend owes you one snack.\nScreenshot this immediately.",
+
+  "You are entitled to one “I told you so.”\nChoose your moment wisely.",
+
+  "You weren't supposed to find this one yet.",
+
+  "Interesting.\nOut of all the fortunes, you found me.",
+
+  "This fortune only appears for people with unusually large heads.",
+
+  "The cookie remembers you.",
+
+  "You found a secret.\nAct normal.",
+
+  "The cookie has been waiting for you to find this one.",
+
+  "Probability brought you here.\nOr your inability to stop tapping the cookie.",
+
+  "If you're reading this, the experiment is working.",
+
+  "The cookie knows something you don't.",
+
+  "There was a version of my life where I hadn't met you yet.\nI'm glad I don't live there anymore.",
+
+  "You were never part of the plan.\nSomehow, you became part of the future.",
+
+  "There are thousands of ordinary days ahead.\nI hope I get a lot of them with you.",
+
+  "You make me curious about the life we haven't lived yet.",
+
+  "Somewhere between meeting you and now,\nyou became part of how I imagine tomorrow.",
+
+  "You spent a long time becoming the man you are.\nI hope you know how much I love the man you became.",
+
+  "You don't have to be strong every day.\nI love the person underneath the armor, too.",
+
+  "I don't need every day with you to be extraordinary.\nI just want the days.",
+
+  "If you're reading this on a difficult day:\ncome home. We'll figure it out together.",
+
+  "You are loved in ways you don't always get to see.",
+
+  "You don't have to earn the love you already have.",
+
+  "You have nothing left to prove to the person you used to be.",
+
+  "The people who love you don't only love you when you're strong.",
+
+  "You are allowed to enjoy the life you worked so hard to reach.",
+
+  "Not everything ahead of you needs to be survived.\nSome of it gets to be lived."
+
+];
+
+
+const ultraRareFortunes = [
+
+  "You found one.\nGo tell Nana: “I found the golden cookie.”",
+
+  "Stop.\nLook at the person who made this for you.\nThat's your fortune.",
+
+  "If you're wondering whether she really sat down and wrote hundreds of these for you:\nyes. She did.",
+
+  "There are billions of people alive at the same time as you.\nSomehow, you found each other.",
+
+  "This cookie will eventually become an old object in your home.\nI hope the two of you get old with it.",
+
+  "No fortune.\nYou already got lucky.",
+
+  "This fortune was written before you knew everything that would happen next.\nLook around.\nYou made it here."
+
+];
+
+
+const missions = [
+
+  "Find your girlfriend.\nKiss her forehead.\nRefuse to explain why.",
+
+  "Tell Nana: “The cookie knows.”\nProvide absolutely no context.",
+
+  "Bring your girlfriend a snack.\nDo not mention this fortune.",
+
+  "Play one song you love and make her listen to the whole thing.",
+
+  "Plan a date.\nDon't tell her where you're going.",
+
+  "Take a photo of the two of you today.\nFuture you will be glad you did.",
+
+  "Cook something together this week.\nSomething neither of you has made before.",
+
+  "Tell her one thing you love about her that you've never said before.",
+
+  "Ask her: “Where should we go next?”",
+
+  "Put your phone down.\nHug her for ten seconds longer than usual.",
+
+  "Choose a song for the two of you.\nDon't explain your choice yet.",
+
+  "Make one ordinary moment today worth remembering."
+
+];
+
+
+const redeemables = [
+
+  "One breakfast in bed.",
+
+  "One massage.\nNo questions asked.",
+
+  "You choose the movie tonight.",
+
+  "One homemade dinner of your choice.",
+
+  "One spontaneous date.\nYour girlfriend plans everything.",
+
+  "One hour of uninterrupted gaming.\nComplaints prohibited.",
+
+  "One dessert.\nYes, even if we said we weren't getting one.",
+
+  "One reasonable favor.",
+
+  "One kiss.\nUnlimited renewals permitted.",
+
+  "You may choose dinner tonight.\nNo negotiations."
+
+];
+
+
+let lastFortune = "";
+
+
+function getRandomItem(array) {
+
+  let item;
+
+  do {
+    item = array[Math.floor(Math.random() * array.length)];
+  } while (item === lastFortune && array.length > 1);
+
+  lastFortune = item;
+
+  return item;
+}
+
+
+function revealFortune() {
+
+  const roll = Math.random() * 100;
+
+  let fortune;
+  let title;
+
+  /*
+      PROBABILITIES
+
+      Normal       84%
+      Rare          8%
+      Mission       4%
+      Redeemable    3%
+      Ultra Rare    1%
+  */
+
+  if (roll < 1) {
+
+    fortune = getRandomItem(ultraRareFortunes);
+    title = "✦ Ultra Rare ✦";
+
+  }
+
+  else if (roll < 9) {
+
+    fortune = getRandomItem(rareFortunes);
+    title = "★ Rare Fortune ★";
+
+  }
+
+  else if (roll < 13) {
+
+    fortune = getRandomItem(missions);
+    title = "★ Secret Mission ★";
+
+  }
+
+  else if (roll < 16) {
+
+    fortune = getRandomItem(redeemables);
+    title = "Redeemable";
+
+  }
+
+  else {
+
+    fortune = getRandomItem(normalFortunes);
+    title = "Your Fortune";
+
+  }
+
+
+  document.getElementById("fortuneTitle").textContent = title;
+  document.getElementById("fortuneText").textContent = fortune;
+
+  document.getElementById("overlay").classList.add("show");
+  document.getElementById("fortuneCard").classList.add("show");
+}
+
+
+function closeFortune() {
+
+  document.getElementById("overlay").classList.remove("show");
+  document.getElementById("fortuneCard").classList.remove("show");
+
+}
+
+
+document.addEventListener("keydown", function(event) {
+
+  if (event.key === "Escape") {
+    closeFortune();
+  }
+
+});
+
+</script>
 
 </body>
 </html>

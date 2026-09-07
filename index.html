@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Fortune</title>
+</head>
+
+<body style="text-align:center; font-family:Arial; padding:50px;">
+
+  <h1>🥠 Your Fortune</h1>
+
+  <p id="fortune">Your fortune is waiting...</p>
+
+  <button onclick="revealFortune()">Reveal my fortune</button>
+
+  <script>
+    const fortunes = [
+      "Something wonderful is coming your way.",
+      "Today is a good day to trust your instincts.",
+      "Someone loves you more than you know.",
+      "An unexpected adventure is waiting for you.",
+      "Your best days are still ahead."
+    ];
+
+    function revealFortune() {
+      const randomNumber = Math.floor(Math.random() * fortunes.length);
+      document.getElementById("fortune").innerText = fortunes[randomNumber];
+    }
+  </script>
+
+</body>
+</html>
